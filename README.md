@@ -1,1 +1,1 @@
-# go-chain
+# kubechain
