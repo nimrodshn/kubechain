@@ -15,6 +15,7 @@
 
 package blockchain
 
+// Blockchain is our internal blockchain implementation.
 type Blockchain struct {
 	Chain []*Block
 }
