@@ -26,10 +26,11 @@ func (bc *Blockchain) AddBlock(data string) {
 		genesis := NewBlock(data, []byte{})
 		chain := []*Block{genesis}
 		bc.Chain = chain
+	} else {
+		prevBlock := bc.Chain[len(bc.Chain)-1]
+		newBlock := NewBlock(data, prevBlock.Hash)
+		bc.Chain = append(bc.Chain, newBlock)
 	}
-	prevBlock := bc.Chain[len(bc.Chain)-1]
-	newBlock := NewBlock(data, prevBlock.Hash)
-	bc.Chain = append(bc.Chain, newBlock)
 }
 
 // NewBlockchain is a constructor for our blockchain struct.
