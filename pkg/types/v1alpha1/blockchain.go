@@ -13,11 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package blockchain
+package v1alpha1
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // Blockchain is our internal blockchain implementation.
 type Blockchain struct {
-	Chain []*Block
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Chain []*Block `json:"chain"`
 }
 
 // AddBlock adds a new block to the blockchain.

@@ -16,21 +16,38 @@
 package main
 
 import (
-	"fmt"
-	"github.com/nimrodshn/kubechain/pkg/blockchain"
+	"flag"
+	"github.com/nimrodshn/kubechain/pkg/clientset/v1alpha1"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"log"
 )
 
+var kubeconfig string
+
+func init() {
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to Kubernetes config file")
+	flag.Parse()
+}
+
 func main() {
-	bc := blockchain.NewBlockchain()
+	var config *rest.Config
+	var err error
 
-	bc.AddBlock("Send 1 BTC to Ivan")
-	bc.AddBlock("Send 2 more BTC to Ivan")
-
-	for _, block := range bc.Chain {
-		fmt.Printf("Prev. hash: %x\n", block.PrevBlockHash)
-		fmt.Printf("Data: %s\n", block.Data)
-		fmt.Printf("Hash: %x\n", block.Hash)
-		fmt.Println()
+	if kubeconfig == "" {
+		log.Printf("using in-cluster configuration")
+		config, err = rest.InClusterConfig()
+	} else {
+		log.Printf("using configuration from '%s'", kubeconfig)
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
-	fmt.Println("Hello KubeChain")
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = v1alpha1.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
 }

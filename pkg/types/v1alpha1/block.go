@@ -13,26 +13,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package blockchain
+package v1alpha1
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
 
 // Block is a simple representation of a blockchain block.
 type Block struct {
-	Timestamp     int64
-	Data          []byte
-	PrevBlockHash []byte
-	Hash          []byte
-	Nonce         int
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,inline"`
+
+	Timestamp     int64  `json:"timestamp"`
+	Data          []byte `json:"data"`
+	PrevBlockHash []byte `json:"prev_block_hash"`
+	Hash          []byte `json:"hash"`
+	Nonce         int    `json:"nonce"`
+}
+
+// BlockList is a list of blocks.
+type BlockList struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,inline"`
+
+	Items []Block `json:"items"`
 }
 
 // NewBlock is a constructor for the block struct.
 func NewBlock(data string, prevBlockHash []byte) *Block {
 	block := &Block{
-		Timestamp: time.Now().Unix(),
-		Data:      []byte(data),
+		Timestamp:     time.Now().Unix(),
+		Data:          []byte(data),
+		PrevBlockHash: prevBlockHash,
 	}
 
 	pow := NewProofOfWork(block)
