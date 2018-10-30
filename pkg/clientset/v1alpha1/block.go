@@ -16,10 +16,11 @@
 package v1alpha1
 
 import (
-	"github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	scheme "github.com/nimrodshn/kubechain/pkg/clientset/scheme"
+	"github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 )
 
@@ -31,6 +32,7 @@ type BlockInterface interface {
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
 }
 
+// blockClient implements BlockInterface for the namespace ns.
 type blockClient struct {
 	restClient rest.Interface
 	ns         string

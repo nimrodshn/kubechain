@@ -17,15 +17,14 @@ package main
 
 import (
 	clientset "github.com/nimrodshn/kubechain/pkg/clientset/v1alpha1"
+	"github.com/nimrodshn/kubechain/pkg/controllers/blockchain"
+	"k8s.io/client-go/util/workqueue"
 
 	"flag"
-	"github.com/nimrodshn/kubechain/pkg/controllers/blockchain"
-	"github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
+
 	"k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/workqueue"
 
 	"log"
 )
@@ -52,8 +51,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	v1alpha1.AddToScheme(scheme.Scheme)
 
 	client, err := clientset.NewForConfig(config)
 	if err != nil {

@@ -15,3 +15,9 @@
 
 kubechain:
 	go build ./cmd/kubechain
+
+.PHONY:
+	clean
+
+clean:
+	rm kubechain

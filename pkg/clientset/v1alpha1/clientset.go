@@ -19,8 +19,9 @@ import (
 	"github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+
+	scheme "github.com/nimrodshn/kubechain/pkg/clientset/scheme"
 )
 
 // KubechainV1Alpha1Interface is an entrypoint for our client.
@@ -39,7 +40,9 @@ func NewForConfig(c *rest.Config) (*KubechainV1Alpha1Client, error) {
 	config := *c
 	config.ContentConfig.GroupVersion = &schema.GroupVersion{Group: v1alpha1.GroupName, Version: v1alpha1.GroupVersion}
 	config.APIPath = "/apis"
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	config.NegotiatedSerializer = serializer.DirectCodecFactory{
+		CodecFactory: scheme.Codecs,
+	}
 	config.UserAgent = rest.DefaultKubernetesUserAgent()
 
 	client, err := rest.RESTClientFor(&config)

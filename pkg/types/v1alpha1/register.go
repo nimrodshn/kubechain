@@ -32,17 +32,17 @@ var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: GroupVer
 
 var (
 	// SchemeBuilder adds the new CRDs Block and Blockchain.
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+	SchemeBuilder = runtime.NewSchemeBuilder(AddKnownTypes)
 	// AddToScheme uses SchemeBuilder to add new CRDs.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
 
-func addKnownTypes(scheme *runtime.Scheme) error {
+// AddKnownTypes .
+func AddKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Block{},
 		&BlockList{},
 	)
-
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
 }
