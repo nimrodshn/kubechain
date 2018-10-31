@@ -230,36 +230,7 @@
 
 [[projects]]
   name = "k8s.io/api"
-  packages = [
-    "admissionregistration/v1alpha1",
-    "admissionregistration/v1beta1",
-    "apps/v1",
-    "apps/v1beta1",
-    "apps/v1beta2",
-    "authentication/v1",
-    "authentication/v1beta1",
-    "authorization/v1",
-    "authorization/v1beta1",
-    "autoscaling/v1",
-    "autoscaling/v2beta1",
-    "batch/v1",
-    "batch/v1beta1",
-    "batch/v2alpha1",
-    "certificates/v1beta1",
-    "core/v1",
-    "events/v1beta1",
-    "extensions/v1beta1",
-    "networking/v1",
-    "policy/v1beta1",
-    "rbac/v1",
-    "rbac/v1alpha1",
-    "rbac/v1beta1",
-    "scheduling/v1alpha1",
-    "settings/v1alpha1",
-    "storage/v1",
-    "storage/v1alpha1",
-    "storage/v1beta1"
-  ]
+  packages = ["core/v1"]
   revision = "af4bc157c3a209798fc897f6d4aaaaeb6c2e0d6a"
   version = "kubernetes-1.9.0"
 
@@ -312,7 +283,6 @@
   branch = "release-6.0"
   name = "k8s.io/client-go"
   packages = [
-    "kubernetes/scheme",
     "pkg/version",
     "rest",
     "rest/watch",
@@ -343,6 +313,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "59c971c227bef5136522638e136302b4da184fba1223095a741cc46ad886b51e"
+  inputs-digest = "fbccecd980d03c6083f031149490ed749cb27da253fed90fc16c58c34afc4171"
   solver-name = "gps-cdcl"
   solver-version = 1

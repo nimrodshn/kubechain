@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubechain-deployment
+  labels:
+    app: kubechain
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubechain
+  template:
+    metadata:
+      labels:
+        app: kubechain
+    spec:
+      containers:
+      - name: kubechain
+        image: nimrodshn/kubechain
