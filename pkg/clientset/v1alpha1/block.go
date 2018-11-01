@@ -18,7 +18,8 @@ package v1alpha1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	scheme "github.com/nimrodshn/kubechain/pkg/clientset/scheme"
+	"k8s.io/client-go/kubernetes/scheme"
+
 	"github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"

@@ -16,15 +16,17 @@
 package main
 
 import (
-	clientset "github.com/nimrodshn/kubechain/pkg/clientset/v1alpha1"
 	"github.com/nimrodshn/kubechain/pkg/controllers/blockchain"
-	"k8s.io/client-go/util/workqueue"
+	v1alpha1 "github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
+
+	clientset "github.com/nimrodshn/kubechain/pkg/clientset/v1alpha1"
 
 	"flag"
 
-	"k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"k8s.io/client-go/kubernetes/scheme"
 
 	"log"
 )
@@ -52,23 +54,17 @@ func main() {
 		panic(err)
 	}
 
+	err = v1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		panic(err)
+	}
+
 	client, err := clientset.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
 
-	informer, indexer := blockchain.NewInformer(v1.NamespaceDefault, client)
-	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-
-	controller := blockchain.NewController(
-		queue,
-		indexer,
-		informer,
-	)
-
-	stop := make(chan struct{})
-	defer close(stop)
-	go controller.Run(1, stop)
+	blockchain.NewInformer("default", client)
 
 	select {}
 }

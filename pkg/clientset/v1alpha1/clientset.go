@@ -19,9 +19,8 @@ import (
 	"github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-
-	scheme "github.com/nimrodshn/kubechain/pkg/clientset/scheme"
 )
 
 // KubechainV1Alpha1Interface is an entrypoint for our client.

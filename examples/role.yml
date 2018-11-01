@@ -1,0 +1,9 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: default
+  name: kubechain
+rules:
+- apiGroups: ["blocks.kubechain.com"] # "" indicates the core API group
+  resources: ["blocks"]
+  verbs: ["get", "watch", "list", "create"]

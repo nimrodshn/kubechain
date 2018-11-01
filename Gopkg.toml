@@ -24,11 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-
-[[constraint]]
-  version = "kubernetes-1.9.0"
-  name = "k8s.io/api"
-
 [[constraint]]
   version = "kubernetes-1.9.0"
   name = "k8s.io/apimachinery"

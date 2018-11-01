@@ -1,0 +1,4 @@
+apiVersion: v1
+kind: Block
+timestamp: 1234
+data: "lalala"

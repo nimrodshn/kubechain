@@ -75,8 +75,8 @@ func (c *Controller) syncBlockchain(key string) error {
 }
 
 // NewInformer Creates a new informer for the Block crd.
-func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface) (cache.Controller, cache.Indexer) {
-	indexer, controller := cache.NewIndexerInformer(
+func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface) (cache.Controller, cache.Store) {
+	store, controller := cache.NewInformer(
 		&cache.ListWatch{
 			ListFunc: func(lo metav1.ListOptions) (result k8sruntime.Object, err error) {
 				return clientSet.Block(ns).List(lo)
@@ -88,10 +88,9 @@ func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface) (cac
 		&v1alpha1.Block{},
 		1*time.Minute,
 		cache.ResourceEventHandlerFuncs{},
-		cache.Indexers{},
 	)
-
-	return controller, indexer
+	go controller.Run(wait.NeverStop)
+	return controller, store
 }
 
 // Run runs the controller
