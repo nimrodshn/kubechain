@@ -1,9 +1,8 @@
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: default
   name: kubechain
 rules:
-- apiGroups: ["blocks.kubechain.com"] # "" indicates the core API group
+- apiGroups: ["kubechain.com"] 
   resources: ["blocks"]
   verbs: ["get", "watch", "list", "create"]

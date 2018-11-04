@@ -35,7 +35,7 @@ type Block struct {
 // BlockList is a list of blocks.
 type BlockList struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,inline"`
+	metav1.ListMeta `json:"metadata,inline"`
 
 	Items []Block `json:"items"`
 }

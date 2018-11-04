@@ -42,7 +42,7 @@ func (in *Block) DeepCopyObject() runtime.Object {
 func (in *BlockList) DeepCopyObject() runtime.Object {
 	out := BlockList{}
 	out.TypeMeta = in.TypeMeta
-	out.ObjectMeta = in.ObjectMeta
+	out.ListMeta = in.ListMeta
 	out.Items = make([]Block, len(in.Items))
 	for idx := range in.Items {
 		out.Items[idx].DeepCopyInto(&out.Items[idx])
