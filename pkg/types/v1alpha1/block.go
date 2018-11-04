@@ -16,8 +16,9 @@
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Block is a simple representation of a blockchain block.
@@ -27,14 +28,14 @@ type Block struct {
 
 	Timestamp     int64  `json:"timestamp"`
 	Data          []byte `json:"data"`
-	PrevBlockHash []byte `json:"prev_block_hash"`
-	Hash          []byte `json:"hash"`
-	Nonce         int    `json:"nonce"`
+	PrevBlockHash []byte `json:"prev_block_hash,omitempty"`
+	Hash          []byte `json:"hash,omitempty"`
+	Nonce         int    `json:"nonce,omitempty"`
 }
 
 // BlockList is a list of blocks.
 type BlockList struct {
-	metav1.TypeMeta   `json:",inline"`
+	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,inline"`
 
 	Items []Block `json:"items"`

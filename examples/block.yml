@@ -1,2 +1,4 @@
 apiVersion: kubechain.com/v1alpha1
 kind: Block
+name: "example-block"
+
