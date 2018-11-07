@@ -3,5 +3,5 @@ kind: Block
 metadata:
   name: "example-block"
 spec:
-  data: "Move one blockchain from Alice to Bob."
+  data: "Move one bitcoin from Alice to Bob."
 
