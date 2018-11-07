@@ -25,12 +25,17 @@ import (
 type Block struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,inline"`
+	Spec              BlockSpec `json:"spec"`
+}
 
-	Timestamp     int64  `json:"timestamp"`
-	Data          []byte `json:"data"`
-	PrevBlockHash []byte `json:"prev_block_hash,omitempty"`
-	Hash          []byte `json:"hash,omitempty"`
-	Nonce         int    `json:"nonce,omitempty"`
+// BlockSpec provides specifications for the block.
+type BlockSpec struct {
+	Data string `json:"data"`
+
+	Timestamp     int64
+	PrevBlockHash []byte
+	Hash          []byte
+	Nonce         int
 }
 
 // BlockList is a list of blocks.
@@ -41,19 +46,13 @@ type BlockList struct {
 	Items []Block `json:"items"`
 }
 
-// NewBlock is a constructor for the block struct.
-func NewBlock(data string, prevBlockHash []byte) *Block {
-	block := &Block{
-		Timestamp:     time.Now().Unix(),
-		Data:          []byte(data),
-		PrevBlockHash: prevBlockHash,
-	}
+// ProcessNewBlock inserts  for the block struct.
+func (b *Block) ProcessNewBlock() {
+	b.Spec.Timestamp = time.Now().Unix()
 
-	pow := NewProofOfWork(block)
+	pow := NewProofOfWork(b)
 	nonce, hash := pow.Run()
 
-	block.Hash = hash
-	block.Nonce = nonce
-
-	return block
+	b.Spec.Hash = hash
+	b.Spec.Nonce = nonce
 }

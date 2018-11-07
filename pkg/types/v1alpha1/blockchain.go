@@ -29,20 +29,17 @@ type Blockchain struct {
 
 // AddBlock adds a new block to the blockchain.
 func (bc *Blockchain) AddBlock(data string) {
+	blockToAdd := &Block{
+		Spec: BlockSpec{
+			Data: data,
+		},
+	}
 	if len(bc.Chain) == 0 {
-		genesis := NewBlock(data, []byte{})
-		chain := []*Block{genesis}
+		chain := []*Block{blockToAdd}
 		bc.Chain = chain
 	} else {
 		prevBlock := bc.Chain[len(bc.Chain)-1]
-		newBlock := NewBlock(data, prevBlock.Hash)
-		bc.Chain = append(bc.Chain, newBlock)
+		blockToAdd.Spec.PrevBlockHash = prevBlock.Spec.Hash
+		bc.Chain = append(bc.Chain, blockToAdd)
 	}
-}
-
-// NewBlockchain is a constructor for our blockchain struct.
-func NewBlockchain() *Blockchain {
-	blockchain := new(Blockchain)
-	blockchain.AddBlock("New Genesis Block")
-	return blockchain
 }

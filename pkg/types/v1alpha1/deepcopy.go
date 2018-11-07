@@ -24,11 +24,13 @@ func (in *Block) DeepCopyInto(out *Block) {
 	out.TypeMeta = in.TypeMeta
 	out.ObjectMeta = in.ObjectMeta
 
-	out.Timestamp = in.Timestamp
-	out.Data = in.Data
-	out.PrevBlockHash = in.PrevBlockHash
-	out.Hash = in.Hash
-	out.Nonce = in.Nonce
+	out.Spec = BlockSpec{
+		Timestamp:     in.Spec.Timestamp,
+		Data:          in.Spec.Data,
+		PrevBlockHash: in.Spec.PrevBlockHash,
+		Hash:          in.Spec.Hash,
+		Nonce:         in.Spec.Nonce,
+	}
 }
 
 // DeepCopyObject returns a generically typed copy of an object

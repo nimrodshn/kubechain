@@ -18,6 +18,7 @@ package main
 import (
 	"github.com/nimrodshn/kubechain/pkg/controllers/blockchain"
 	v1alpha1 "github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	clientset "github.com/nimrodshn/kubechain/pkg/clientset/v1alpha1"
 
@@ -25,6 +26,7 @@ import (
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/workqueue"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -64,7 +66,11 @@ func main() {
 		panic(err)
 	}
 
-	blockchain.NewInformer("default", client)
+	informer := blockchain.NewInformer("default", client)
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
-	select {}
+	controller := blockchain.NewController(queue, informer)
+
+	controller.Run(wait.NeverStop)
+
 }

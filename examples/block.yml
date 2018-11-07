@@ -1,4 +1,7 @@
 apiVersion: kubechain.com/v1alpha1
 kind: Block
-name: "example-block"
+metadata:
+  name: "example-block"
+spec:
+  data: "Move one blockchain from Alice to Bob."
 

@@ -15,8 +15,7 @@
        required: ["spec"]
        properties:
          spec:
-           required: ["replicas"]
+           required: ["data"]
            properties:
-            replicas:
-              type: "integer"
-              minimum: 1
+            data:
+              type: "string"
