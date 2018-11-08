@@ -23,6 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
@@ -35,19 +36,49 @@ import (
 type Controller struct {
 	queue    workqueue.RateLimitingInterface
 	informer cache.Controller
+	indexer  cache.Indexer
 }
 
 // NewController is a constructor for the block controller.
-func NewController(queue workqueue.RateLimitingInterface, informer cache.Controller) *Controller {
+func NewController(queue workqueue.RateLimitingInterface, informer cache.Controller, indexer cache.Indexer) *Controller {
 	return &Controller{
 		informer: informer,
 		queue:    queue,
+		indexer:  indexer,
 	}
 }
 
+func (c *Controller) processNextItem() bool {
+	// Wait until there is a new item in the working queue
+	key, quit := c.queue.Get()
+	if quit {
+		return false
+	}
+
+	// Tell the queue that we are done with processing this key. This unblocks the key for other workers
+	// This allows safe parallel processing because two pods with the same key are never processed in
+	// parallel.
+	defer c.queue.Done(key)
+
+	// Invoke the method containing the business logic
+	err := addBlockEventHandler(key.(string), c.indexer)
+	if err == nil {
+		// Forget about the #AddRateLimited history of the key on every successful synchronization.
+		// This ensures that future processing of updates for this key is not delayed because of
+		// an outdated error history.
+		c.queue.Forget(key)
+		return true
+	}
+	return true
+}
+
+func (c *Controller) syncBlockchain(key string) error {
+	return nil
+}
+
 // NewInformer Creates a new informer for the Block crd.
-func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface) cache.Controller {
-	_, controller := cache.NewInformer(
+func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queue workqueue.RateLimitingInterface) (cache.Indexer, cache.Controller) {
+	indexer, controller := cache.NewIndexerInformer(
 		&cache.ListWatch{
 			ListFunc: func(lo metav1.ListOptions) (result k8sruntime.Object, err error) {
 				return clientSet.Block(ns).List(lo)
@@ -59,20 +90,35 @@ func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface) cach
 		&v1alpha1.Block{},
 		1*time.Minute,
 		cache.ResourceEventHandlerFuncs{
-			AddFunc: addBlockEventHandler,
+			AddFunc: func(obj interface{}) {
+				key, err := cache.MetaNamespaceKeyFunc(obj)
+				if err == nil {
+					queue.Add(key)
+				}
+			},
 		},
+		cache.Indexers{},
 	)
-	return controller
+	return indexer, controller
 }
 
-func addBlockEventHandler(obj interface{}) {
-	block := obj.(*v1alpha1.Block)
-	block.ProcessNewBlock()
-	glog.Infof("Processing new block: %v", block)
+func addBlockEventHandler(key string, indexer cache.Indexer) error {
+	item, exists, err := indexer.GetByKey(key)
+	if err != nil {
+		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
+		return err
+	} else if !exists {
+		fmt.Printf("Block %s does not exist anymore\n", key)
+	} else {
+		block := item.(*v1alpha1.Block)
+		block.ProcessNewBlock()
+		glog.Infof("Processing new block: %v", block)
+	}
+	return nil
 }
 
 // Run runs the controller
-func (c *Controller) Run(stopCh <-chan struct{}) {
+func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) {
 	defer runtime.HandleCrash()
 
 	// Let the workers stop when we are done
@@ -86,5 +132,14 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 		return
 	}
 
+	for i := 0; i < threadiness; i++ {
+		go wait.Until(c.runWorker, time.Second, stopCh)
+	}
+
 	<-stopCh
+}
+
+func (c *Controller) runWorker() {
+	for c.processNextItem() {
+	}
 }

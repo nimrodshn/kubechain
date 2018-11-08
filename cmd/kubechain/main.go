@@ -24,16 +24,17 @@ import (
 
 	"flag"
 
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/workqueue"
-
-	"k8s.io/client-go/kubernetes/scheme"
 
 	"log"
 )
 
 var kubeconfig string
+
+const threadCount = 3
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to Kubernetes config file")
@@ -66,11 +67,12 @@ func main() {
 		panic(err)
 	}
 
-	informer := blockchain.NewInformer("default", client)
 	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
-	controller := blockchain.NewController(queue, informer)
+	indexer, informer := blockchain.NewInformer("default", client, queue)
 
-	controller.Run(wait.NeverStop)
+	controller := blockchain.NewController(queue, informer, indexer)
+
+	controller.Run(threadCount, wait.NeverStop)
 
 }
