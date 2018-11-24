@@ -72,10 +72,6 @@ func (c *Controller) processNextItem() bool {
 	return true
 }
 
-func (c *Controller) syncBlockchain(key string) error {
-	return nil
-}
-
 // NewInformer Creates a new informer for the Block crd.
 func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queue workqueue.RateLimitingInterface) (cache.Indexer, cache.Controller) {
 	indexer, controller := cache.NewIndexerInformer(
