@@ -71,11 +71,16 @@ func main() {
 		panic(err)
 	}
 
+	// Create the queue for block events.
 	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
+	// Create the informer which has a cache of all the blocks representing the current system.
+	// This cache is the used by the informer to react to create/update/delete block events which are then passed to the queue
+	// to be processed.
 	informer := blockchain.NewInformer(defaultNamespace, client, queue)
 
-	controller := blockchain.NewController(queue, informer)
+	// Construct our controller from the given queue and informers and a new blockcahin.
+	controller := blockchain.NewController(queue, informer, new(v1alpha1.Blockchain))
 
 	controller.Run(threadCount, wait.NeverStop)
 

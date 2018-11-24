@@ -34,12 +34,13 @@ import (
 
 // Controller is the custom controller for the blockchain CRD.
 type Controller struct {
-	queue    workqueue.RateLimitingInterface
-	informer cache.SharedIndexInformer
+	queue      workqueue.RateLimitingInterface
+	informer   cache.SharedIndexInformer
+	blockchain *v1alpha1.Blockchain
 }
 
 // NewController is a constructor for the block controller.
-func NewController(queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer) *Controller {
+func NewController(queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, blockchain *v1alpha1.Blockchain) *Controller {
 	informer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
@@ -53,8 +54,9 @@ func NewController(queue workqueue.RateLimitingInterface, informer cache.SharedI
 			},
 		})
 	return &Controller{
-		informer: informer,
-		queue:    queue,
+		informer:   informer,
+		queue:      queue,
+		blockchain: blockchain,
 	}
 }
 
@@ -109,8 +111,8 @@ func addBlockEventHandler(key string, indexer cache.Indexer) error {
 		fmt.Printf("Block %s does not exist anymore\n", key)
 	} else {
 		block := item.(*v1alpha1.Block)
-		block.ProcessNewBlock()
 		glog.Infof("Processing new block: %v", block)
+		block.ProcessNewBlock()
 	}
 	return nil
 }
