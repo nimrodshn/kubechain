@@ -35,16 +35,26 @@ import (
 // Controller is the custom controller for the blockchain CRD.
 type Controller struct {
 	queue    workqueue.RateLimitingInterface
-	informer cache.Controller
-	indexer  cache.Indexer
+	informer cache.SharedIndexInformer
 }
 
 // NewController is a constructor for the block controller.
-func NewController(queue workqueue.RateLimitingInterface, informer cache.Controller, indexer cache.Indexer) *Controller {
+func NewController(queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer) *Controller {
+	informer.AddEventHandler(
+		cache.ResourceEventHandlerFuncs{
+			AddFunc: func(obj interface{}) {
+				var key string
+				var err error
+				if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
+					runtime.HandleError(err)
+					return
+				}
+				queue.Add(key)
+			},
+		})
 	return &Controller{
 		informer: informer,
 		queue:    queue,
-		indexer:  indexer,
 	}
 }
 
@@ -61,7 +71,7 @@ func (c *Controller) processNextItem() bool {
 	defer c.queue.Done(key)
 
 	// Invoke the method containing the business logic
-	err := addBlockEventHandler(key.(string), c.indexer)
+	err := addBlockEventHandler(key.(string), c.informer.GetIndexer())
 	if err == nil {
 		// Forget about the #AddRateLimited history of the key on every successful synchronization.
 		// This ensures that future processing of updates for this key is not delayed because of
@@ -73,8 +83,8 @@ func (c *Controller) processNextItem() bool {
 }
 
 // NewInformer Creates a new informer for the Block crd.
-func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queue workqueue.RateLimitingInterface) (cache.Indexer, cache.Controller) {
-	indexer, controller := cache.NewIndexerInformer(
+func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queue workqueue.RateLimitingInterface) cache.SharedIndexInformer {
+	informer := cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(lo metav1.ListOptions) (result k8sruntime.Object, err error) {
 				return clientSet.Block(ns).List(lo)
@@ -85,17 +95,9 @@ func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queu
 		},
 		&v1alpha1.Block{},
 		1*time.Minute,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				key, err := cache.MetaNamespaceKeyFunc(obj)
-				if err == nil {
-					queue.Add(key)
-				}
-			},
-		},
 		cache.Indexers{},
 	)
-	return indexer, controller
+	return informer
 }
 
 func addBlockEventHandler(key string, indexer cache.Indexer) error {

@@ -34,7 +34,11 @@ import (
 
 var kubeconfig string
 
+// The number of threads to process events.
 const threadCount = 3
+
+// The namespace to run our controller on.
+const defaultNamespace = "default"
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "path to Kubernetes config file")
@@ -69,9 +73,9 @@ func main() {
 
 	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
-	indexer, informer := blockchain.NewInformer("default", client, queue)
+	informer := blockchain.NewInformer(defaultNamespace, client, queue)
 
-	controller := blockchain.NewController(queue, informer, indexer)
+	controller := blockchain.NewController(queue, informer)
 
 	controller.Run(threadCount, wait.NeverStop)
 
