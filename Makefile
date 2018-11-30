@@ -18,6 +18,11 @@ kubechain:
 
 .PHONY:
 	clean
+	image
 
 clean:
 	rm kubechain
+
+image:
+	docker build -t nimrodshn/kubechain:lastest .
+

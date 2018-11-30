@@ -16,11 +16,11 @@
 package main
 
 import (
-	"github.com/nimrodshn/kubechain/pkg/controllers/blockchain"
-	v1alpha1 "github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
-	"k8s.io/apimachinery/pkg/util/wait"
-
 	clientset "github.com/nimrodshn/kubechain/pkg/clientset/v1alpha1"
+	v1alpha1 "github.com/nimrodshn/kubechain/pkg/types/v1alpha1"
+
+	"github.com/nimrodshn/kubechain/pkg/controllers/blockchain"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"flag"
 

@@ -73,7 +73,7 @@ func (c *Controller) processNextItem() bool {
 	defer c.queue.Done(key)
 
 	// Invoke the method containing the business logic
-	err := addBlockEventHandler(key.(string), c.informer.GetIndexer())
+	err := c.addBlockEventHandler(key.(string), c.informer.GetIndexer())
 	if err == nil {
 		// Forget about the #AddRateLimited history of the key on every successful synchronization.
 		// This ensures that future processing of updates for this key is not delayed because of
@@ -102,18 +102,23 @@ func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queu
 	return informer
 }
 
-func addBlockEventHandler(key string, indexer cache.Indexer) error {
+func (c *Controller) addBlockEventHandler(key string, indexer cache.Indexer) error {
 	item, exists, err := indexer.GetByKey(key)
 	if err != nil {
 		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
 		return err
 	} else if !exists {
-		fmt.Printf("Block %s does not exist anymore\n", key)
-	} else {
-		block := item.(*v1alpha1.Block)
-		glog.Infof("Processing new block: %v", block)
-		block.ProcessNewBlock()
+		return fmt.Errorf("Block %s does not exist anymore", key)
 	}
+	block, ok := item.(*v1alpha1.Block)
+	if !ok {
+		return fmt.Errorf("An error occured! expected a resource of type block instead got %T", item)
+	}
+	glog.Infof("Processing new block: %v", block)
+
+	// Run PoW, set Timestamp.
+	block.Process()
+	c.blockchain.AddBlock(block)
 	return nil
 }
 

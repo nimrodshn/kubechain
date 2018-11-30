@@ -46,8 +46,8 @@ type BlockList struct {
 	Items []Block `json:"items"`
 }
 
-// ProcessNewBlock inserts  for the block struct.
-func (b *Block) ProcessNewBlock() {
+// Process files in all the fields for our Block type.
+func (b *Block) Process() {
 	b.Spec.Timestamp = time.Now().Unix()
 
 	pow := NewProofOfWork(b)

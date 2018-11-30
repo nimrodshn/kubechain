@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"github.com/golang/glog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,18 +29,14 @@ type Blockchain struct {
 }
 
 // AddBlock adds a new block to the blockchain.
-func (bc *Blockchain) AddBlock(data string) {
-	blockToAdd := &Block{
-		Spec: BlockSpec{
-			Data: data,
-		},
-	}
+func (bc *Blockchain) AddBlock(block *Block) {
+	glog.Infof("Adding new block...")
 	if len(bc.Chain) == 0 {
-		chain := []*Block{blockToAdd}
+		chain := []*Block{block}
 		bc.Chain = chain
 	} else {
 		prevBlock := bc.Chain[len(bc.Chain)-1]
-		blockToAdd.Spec.PrevBlockHash = prevBlock.Spec.Hash
-		bc.Chain = append(bc.Chain, blockToAdd)
+		block.Spec.PrevBlockHash = prevBlock.Spec.Hash
+		bc.Chain = append(bc.Chain, block)
 	}
 }
