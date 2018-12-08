@@ -31,6 +31,7 @@ type BlockInterface interface {
 	Get(name string, options metav1.GetOptions) (*v1alpha1.Block, error)
 	Create(*v1alpha1.Block) (*v1alpha1.Block, error)
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
+	Delete(name string, options *metav1.DeleteOptions) error
 }
 
 // blockClient implements BlockInterface for the namespace ns.
@@ -88,3 +89,16 @@ func (c *blockClient) Watch(opts metav1.ListOptions) (watch.Interface, error) {
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Watch()
 }
+
+func (c *blockClient) Delete(name string, options *metav1.DeleteOptions) error {
+	return c.restClient.
+		Delete().
+		Namespace(c.ns).
+		Resource("blocks").
+		Name(name).
+		Body(options).
+		Do().
+		Error()
+}
+
+// TODO: add patch here.

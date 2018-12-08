@@ -30,12 +30,11 @@ type Block struct {
 
 // BlockSpec provides specifications for the block.
 type BlockSpec struct {
-	Data string `json:"data"`
-
-	Timestamp     int64
-	PrevBlockHash []byte
-	Hash          []byte
-	Nonce         int
+	Data          string `json:"data"`
+	Timestamp     int64  `json:"timestamp,omitempty"`
+	PrevBlockHash []byte `json:"prev_block_hash,omitempty"`
+	Hash          []byte `json:"hash,omitempty"`
+	Nonce         int    `json:"nonce,omitempty"`
 }
 
 // BlockList is a list of blocks.
@@ -47,12 +46,14 @@ type BlockList struct {
 }
 
 // Process files in all the fields for our Block type.
-func (b *Block) Process() {
-	b.Spec.Timestamp = time.Now().Unix()
+func (b *Block) Process(successChan chan<- bool) {
 
 	pow := NewProofOfWork(b)
 	nonce, hash := pow.Run()
 
+	b.Spec.Timestamp = time.Now().Unix()
 	b.Spec.Hash = hash
 	b.Spec.Nonce = nonce
+
+	successChan <- true
 }

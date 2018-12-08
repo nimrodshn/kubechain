@@ -32,15 +32,21 @@ import (
 	"time"
 )
 
+const timeout = time.Minute * 2
+
 // Controller is the custom controller for the blockchain CRD.
 type Controller struct {
 	queue      workqueue.RateLimitingInterface
 	informer   cache.SharedIndexInformer
 	blockchain *v1alpha1.Blockchain
+	clientset  clientset.KubechainV1Alpha1Interface
 }
 
 // NewController is a constructor for the block controller.
-func NewController(queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, blockchain *v1alpha1.Blockchain) *Controller {
+func NewController(queue workqueue.RateLimitingInterface,
+	informer cache.SharedIndexInformer,
+	blockchain *v1alpha1.Blockchain,
+	clientSet clientset.KubechainV1Alpha1Interface) *Controller {
 	informer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
@@ -57,6 +63,7 @@ func NewController(queue workqueue.RateLimitingInterface, informer cache.SharedI
 		informer:   informer,
 		queue:      queue,
 		blockchain: blockchain,
+		clientset:  clientSet,
 	}
 }
 
@@ -103,6 +110,7 @@ func NewInformer(ns string, clientSet clientset.KubechainV1Alpha1Interface, queu
 }
 
 func (c *Controller) addBlockEventHandler(key string, indexer cache.Indexer) error {
+
 	item, exists, err := indexer.GetByKey(key)
 	if err != nil {
 		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
@@ -116,9 +124,18 @@ func (c *Controller) addBlockEventHandler(key string, indexer cache.Indexer) err
 	}
 	glog.Infof("Processing new block: %v", block)
 
+	successChan := make(chan bool)
+
 	// Run PoW, set Timestamp.
-	block.Process()
-	c.blockchain.AddBlock(block)
+	go block.Process(successChan)
+
+	select {
+	case <-successChan:
+		c.blockchain.AddBlock(block)
+	case <-time.After(timeout):
+		c.purgeBlock(block)
+		return fmt.Errorf("failed to process new block - PoW exceeded timout")
+	}
 	return nil
 }
 
@@ -147,4 +164,8 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) {
 func (c *Controller) runWorker() {
 	for c.processNextItem() {
 	}
+}
+
+func (c *Controller) purgeBlock(block *v1alpha1.Block) {
+	c.clientset.Block(block.Namespace).Delete(block.Name, &metav1.DeleteOptions{})
 }

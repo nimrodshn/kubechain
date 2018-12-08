@@ -19,3 +19,11 @@
            properties:
             data:
               type: "string"
+            timestamp:
+              type: "int"
+            prev_block_hash:
+              type: "string"
+            hash:
+              type: "string"
+            nonce:
+              type: "int"          

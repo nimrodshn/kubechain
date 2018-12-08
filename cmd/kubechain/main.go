@@ -80,7 +80,11 @@ func main() {
 	informer := blockchain.NewInformer(defaultNamespace, client, queue)
 
 	// Construct our controller from the given queue and informers and a new blockcahin.
-	controller := blockchain.NewController(queue, informer, new(v1alpha1.Blockchain))
+	controller := blockchain.NewController(
+		queue,
+		informer,
+		new(v1alpha1.Blockchain),
+		client)
 
 	controller.Run(threadCount, wait.NeverStop)
 

@@ -1,7 +1,0 @@
-apiVersion: kubechain.com/v1alpha1
-kind: Block
-metadata:
-  name: "second-example-block"
-spec:
-  data: "Move one bitcoin from Bob to Greg."
-
